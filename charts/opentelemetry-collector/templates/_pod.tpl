@@ -31,6 +31,7 @@ containers:
         {{- end }}
       {{- end }}
       {{- end }}
+
     env:
       - name: MY_POD_IP
         valueFrom:
@@ -51,9 +52,18 @@ containers:
       - name: HOST_DEV
         value: /hostfs/dev
       {{- end }}
+      {{- if or .Values.extraEnvs .Values.envWithTpl }}
       {{- with .Values.extraEnvs }}
       {{- . | toYaml | nindent 6 }}
       {{- end }}
+    {{- range $item := .Values.envWithTpl }}
+      - name: {{ $item.name }}
+        value: {{ tpl $item.value $ | quote }}
+    {{- end }}
+  {{- end }}
+
+
+
     {{- if .Values.lifecycleHooks }}
     lifecycle:
       {{- toYaml .Values.lifecycleHooks | nindent 6 }}
